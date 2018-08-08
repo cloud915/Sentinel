@@ -17,6 +17,7 @@ package com.alibaba.csp.sentinel.slotchain;
 
 /**
  * Link all processor slots as a chain.
+ * 将所有处理器槽连接成一个链。形成调用链
  *
  * @author qinan.qn
  */

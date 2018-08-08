@@ -55,32 +55,39 @@ public class CtSph implements Sph {
 
     /**
      * Do all {@link Rule}s checking about the resource.
+     * 针对资源，执行所有规则检查
      *
      * <p>Each distinct resource will use a {@link ProcessorSlot} to do rules checking. Same resource will use
      * same {@link ProcessorSlot} globally. </p>
+     * 针对不同资源，使用 资源插槽 来进行规则检查。 相同资源则使用全局相同的 资源插槽检查
      *
      * <p>Note that total {@link ProcessorSlot} count must not exceed {@link Constants#MAX_SLOT_CHAIN_SIZE},
      * otherwise no rules checking will do. In this condition, all requests will pass directly, with no checking
      * or exception.</p>
+     * 注意，资源插槽数量不能超过 MAX_SLOT_CHAIN_SIZE的值，否则将没有规则可检查。检查过程中如果没有异常或不被检查，则请求允许通过。
      *
-     * @param resourceWrapper resource name
-     * @param count           tokens needed
-     * @param args            arguments of user method call
+     * @param resourceWrapper resource name 资源名（接口名、方法名）
+     * @param count           tokens needed 需要的令牌数量
+     * @param args            arguments of user method call 请求方法的参数列表
      * @return {@link Entry} represents this call
      * @throws BlockException if any rule's threshold is exceeded
      */
     public Entry entry(ResourceWrapper resourceWrapper, int count, Object... args) throws BlockException {
+        // 获取上下文信息
         Context context = ContextUtil.getContext();
         if (context instanceof NullContext) {
             // Init the entry only. No rule checking will occur.
+            // 之前没有创建上下文，此时直接允许请求通过
             return new CtEntry(resourceWrapper, null, context);
         }
 
         if (context == null) {
+            // 创建一个默认数据的上下文
             context = MyContextUtil.myEnter(Constants.CONTEXT_DEFAULT_NAME, "", resourceWrapper.getType());
         }
 
         // Global switch is close, no rule checking will do.
+        // 全局配置关闭，则无规则校验
         if (!Constants.ON) {
             return new CtEntry(resourceWrapper, null, context);
         }
@@ -97,6 +104,7 @@ public class CtSph implements Sph {
 
         Entry e = new CtEntry(resourceWrapper, chain, context);
         try {
+            // 获取令牌
             chain.entry(context, resourceWrapper, null, count, args);
         } catch (BlockException e1) {
             e.exit(count, args);
@@ -110,19 +118,23 @@ public class CtSph implements Sph {
     /**
      * Get {@link ProcessorSlotChain} of the resource. new {@link ProcessorSlotChain} will
      * be created if the resource doesn't relate one.
+     * 从资源中 获取 “处理器插槽链” ProcessorSlotChain。如果不存在则创建新的ProcessorSlotChain
      *
      * <p>Same resource({@link ResourceWrapper#equals(Object)}) will share the same
      * {@link ProcessorSlotChain} globally, no matter in witch {@link Context}.<p/>
+     * 相同资源将共享相同的处理器插槽链，无论在哪个上下文中。判断相同以ResourceWrapper#equals(Object)方法为准。
      *
      * <p>
      * Note that total {@link ProcessorSlot} count must not exceed {@link Constants#MAX_SLOT_CHAIN_SIZE},
      * otherwise null will return.
+     * 请注意，“处理器插槽”ProcessorSlot 的总和 不能超过 MAX_SLOT_CHAIN_SIZE，否则返回null
      * </p>
      *
      * @param resourceWrapper target resource
      * @return {@link ProcessorSlotChain} of the resource
      */
     private ProcessorSlot<Object> lookProcessChain(ResourceWrapper resourceWrapper) {
+        // 从map中获取 ProcessorSlotChain，如果没有则创建要给新的并加入map
         ProcessorSlotChain chain = chainMap.get(resourceWrapper);
         if (chain == null) {
             synchronized (LOCK) {
@@ -270,6 +282,7 @@ public class CtSph implements Sph {
         MethodResourceWrapper resource = new MethodResourceWrapper(method, type);
         return entry(resource, count, args);
     }
+
 
     @Override
     public Entry entry(String name, EntryType type, int count, Object... args) throws BlockException {

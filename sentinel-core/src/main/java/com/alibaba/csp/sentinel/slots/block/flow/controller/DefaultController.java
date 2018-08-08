@@ -36,6 +36,7 @@ public class DefaultController implements Controller {
     @Override
     public boolean canPass(Node node, int acquireCount) {
         int curCount = avgUsedTokens(node);
+        // 剩余令牌数量是否满足 申请的令牌数量
         if (curCount + acquireCount > count) {
             return false;
         }
@@ -47,6 +48,7 @@ public class DefaultController implements Controller {
         if (node == null) {
             return -1;
         }
+        // 根据当前级别，使用 当前并发线程数 或 当前QPS 来作为平均令牌数量
         return grade == RuleConstant.FLOW_GRADE_THREAD ? node.curThreadNum() : (int)node.passQps();
     }
 

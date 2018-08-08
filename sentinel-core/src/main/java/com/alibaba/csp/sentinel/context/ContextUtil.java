@@ -61,21 +61,26 @@ public class ContextUtil {
      * Enter the invocation context. The context is ThreadLocal, meaning that
      * each thread has it's own {@link Context}. New context will be created if
      * current thread doesn't have one.
+     * 进入调用上下文。这个上下文是线程本地变量，也就是每个线程独有的。如果当前线程不存在上下文，则创建一个新的上下文
      * </p>
      * <p>
      * A context will be related to a {@link EntranceNode}, which represents the entrance
      * of the invocation tree. New {@link EntranceNode} will be created if
      * current context does't have one. Note that same context name will share
      * same {@link EntranceNode} globally.
+     * 一个上下问会和一个入口节点有关，它代表了调用树的入口。如果上下问不存在则创建一个入口节点。注意，相同上下文明村将在全局共享入口节点
      * </p>
      * <p>
      * Note that each distinct {@code origin} of {@code name} will lead to creating a new
      * {@link Node}, meaning that total {@link Node} created will be of:<br/>
      * {@code distinct context name count * distinct origin count} <br/>
      * So when origin is too many, memory efficiency should be carefully considered.
+     * 请注意，每个名称不同的源，将创建一个新节点。也就是说，所创建的节点总和= 不同名称上下文数量*不同源的数量
+     * 因此，当源点太多时，应该仔细考虑内存效率
      * </p>
      * <p>
      * Same resource in different context will count separately, see {@link NodeSelectorSlot}.
+     * 在不同的上下文中，相同的资源将当度计算，参见NodeSelectorSlot
      * </p>
      *
      * @param name   the context name.
@@ -95,23 +100,28 @@ public class ContextUtil {
     protected static Context trueEnter(String name, String origin) {
         Context context = contextHolder.get();
         if (context == null) {
+            // 获取本地缓存map
             Map<String, DefaultNode> localCacheNameMap = contextNameNodeMap;
+            // 根据名称，获取默认节点信息（也就是注释中提到的node）
             DefaultNode node = localCacheNameMap.get(name);
             if (node == null) {
                 if (localCacheNameMap.size() > Constants.MAX_CONTEXT_NAME_SIZE) {
                     return NULL_CONTEXT;
                 } else {
                     try {
+                        // 加锁创建node
                         LOCK.lock();
                         node = contextNameNodeMap.get(name);
                         if (node == null) {
                             if (contextNameNodeMap.size() > Constants.MAX_CONTEXT_NAME_SIZE) {
                                 return NULL_CONTEXT;
                             } else {
+                                // 新建一个入口节点，其中资源信息包含 应用名称、入口类型(IN/OUT)
                                 node = new EntranceNode(new StringResourceWrapper(name, EntryType.IN), null);
-                                // Add entrance node.
+                                // Add entrance node. //
                                 Constants.ROOT.addChild(node);
 
+                                // 新创建的节点，加入本地缓存map
                                 Map<String, DefaultNode> newMap = new HashMap<String, DefaultNode>(
                                     contextNameNodeMap.size() + 1);
                                 newMap.putAll(contextNameNodeMap);

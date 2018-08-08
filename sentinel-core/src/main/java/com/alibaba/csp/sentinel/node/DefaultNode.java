@@ -29,10 +29,12 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
  * <p>
  * A {@link Node} use to hold statistics for specific resource name in the specific context.
  * Each distinct resource in each distinct {@link Context} will corresponding to a {@link DefaultNode}.
+ * 一个节点用于在特定上下文中保持特定资源名称的统计信息。每个不同的上下文中的每个不同的资源都将对应于 一个默认节点
  * </p>
  * <p>
  * This class may have a list of sub {@link DefaultNode}s. sub-node will be created when
  * call {@link SphU}#entry() or {@link SphO}@entry() multi times in the same {@link Context}.
+ * 该类可能有一个 子节点列表，子节点将在同一个上下文中 由 SphU或SphO 多次调用
  * </p>
  *
  * @author qinan.qn

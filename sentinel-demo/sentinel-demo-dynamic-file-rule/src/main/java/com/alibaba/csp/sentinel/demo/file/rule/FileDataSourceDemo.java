@@ -56,6 +56,7 @@ import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
  * configs.
  * </p>
  *
+ * 将配置规则-资源化
  * @author Carpenter Lee
  */
 public class FileDataSourceDemo {

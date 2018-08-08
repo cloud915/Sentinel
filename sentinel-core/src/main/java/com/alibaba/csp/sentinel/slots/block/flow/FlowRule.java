@@ -148,16 +148,21 @@ public class FlowRule extends AbstractRule {
     @Override
     public boolean passCheck(Context context, DefaultNode node, int acquireCount, Object... args) {
         String limitApp = this.getLimitApp();
+        // 如果限流列表中没有，则通过
         if (limitApp == null) {
             return true;
         }
 
         String origin = context.getOrigin();
+        // 获取node，后面只是用它内部的属性，可以当做上下文的概念
         Node selectedNode = selectNodeByRequesterAndStrategy(origin, context, node);
         if (selectedNode == null) {
             return true;
         }
-
+        // 申请令牌，根据controller的不同实现，申请方式不同
+        // DefaultController:根据并发线程数或qps，计算令牌桶当前令牌数量
+        // PaceController：按照斜率来计算计划中应该什么时候通过
+        // WarmUpController: 令牌桶方式，通过qps进行计算来判断是否通过
         return controller.canPass(selectedNode, acquireCount);
     }
 
@@ -166,6 +171,7 @@ public class FlowRule extends AbstractRule {
         String limitApp = this.getLimitApp();
 
         if (limitApp.equals(origin)) {
+            //0为直接限流;1为关联限流;2为链路限流
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 return context.getOriginNode();
             }

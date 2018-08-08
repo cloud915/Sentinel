@@ -28,6 +28,8 @@ import com.alibaba.csp.sentinel.slots.block.SentinelRpcException;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 
+import com.alibaba.csp.sentinel.slots.system.SystemRule;
+import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -50,6 +52,7 @@ public class FooConsumerBootstrap {
 
     public static void main(String[] args) {
         initFlowRule();
+        initSystemRule();
         InitExecutor.doInit();
 
         AnnotationConfigApplicationContext consumerContext = new AnnotationConfigApplicationContext();
@@ -57,7 +60,7 @@ public class FooConsumerBootstrap {
         consumerContext.refresh();
 
         FooServiceConsumer service = consumerContext.getBean(FooServiceConsumer.class);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 800; i++) {
             pool.submit(() -> {
                 try {
                     String message = service.sayHello("Eric");
@@ -81,5 +84,15 @@ public class FooConsumerBootstrap {
         flowRule.setGrade(RuleConstant.FLOW_GRADE_THREAD);
         flowRule.setLimitApp("default");
         FlowRuleManager.loadRules(Collections.singletonList(flowRule));
+    }
+    private static void initSystemRule() {
+        SystemRule systemRule=new SystemRule();
+        systemRule.setResource(RES_KEY);
+        systemRule.setAvgRt(10);
+        systemRule.setHighestSystemLoad(20); // load值控制
+        systemRule.setMaxThread(100);
+        systemRule.setQps(20);
+        systemRule.setLimitApp("default");
+        SystemRuleManager.loadRules(Collections.singletonList(systemRule));
     }
 }

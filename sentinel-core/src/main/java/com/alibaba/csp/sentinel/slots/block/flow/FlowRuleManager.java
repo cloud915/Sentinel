@@ -146,9 +146,11 @@ public class FlowRuleManager {
     public static void checkFlow(ResourceWrapper resource, Context context, DefaultNode node, int count)
         throws BlockException {
         if (flowRules != null) {
+            // 获取当前资源名对应的规则列表
             List<FlowRule> rules = flowRules.get(resource.getName());
             if (rules != null) {
                 for (FlowRule rule : rules) {
+                    // 逐个检查是否满足规则：限流
                     if (!rule.passCheck(context, node, count)) {
                         throw new FlowException(rule.getLimitApp());
                     }

@@ -18,6 +18,7 @@ package com.alibaba.csp.sentinel.slotchain;
 import com.alibaba.csp.sentinel.context.Context;
 
 /**
+ * 默认处理器插槽链的实现
  * @author qinan.qn
  * @author jialiang.linjl
  */

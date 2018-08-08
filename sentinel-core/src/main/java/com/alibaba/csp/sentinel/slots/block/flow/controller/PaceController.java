@@ -46,17 +46,20 @@ public class PaceController implements Controller {
 
         //期待时间
         long expectedTime = costTime + latestPassedTime.get();
-
+        // 当前时间晚于或等于期待的时间，则允许通过
         if (expectedTime <= currentTime) {
-            //这里会有冲突,然而冲突就冲突吧.
+            // dubbo：这里会有冲突,然而冲突就冲突吧.
             latestPassedTime.set(currentTime);
             return true;
         } else {
-            // 计算自己需要的等待时间
+            // dubbo：计算自己需要的等待时间
             long waitTime = costTime + latestPassedTime.get() - TimeUtil.currentTimeMillis();
             if (waitTime >= maxQueueingTimeMs) {
+                // 等待时间超过 最大等待时间，则拒绝
                 return false;
             } else {
+                // 等待时间在允许范围内，则进行sleep
+                // 修正 统计数据
                 long oldTime = latestPassedTime.addAndGet(costTime);
                 try {
                     waitTime = oldTime - TimeUtil.currentTimeMillis();

@@ -35,7 +35,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 public class FooConsumerBootstrap {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         InitExecutor.doInit();
 
         AnnotationConfigApplicationContext consumerContext = new AnnotationConfigApplicationContext();
@@ -44,15 +44,16 @@ public class FooConsumerBootstrap {
 
         FooServiceConsumer service = consumerContext.getBean(FooServiceConsumer.class);
 
-        for (int i = 0; i < 15; i++) {
-           try {
-                    String message = service.sayHello("Eric");
-                    System.out.println("Success: " + message);
-                } catch (SentinelRpcException ex) {
-                    System.out.println("Blocked");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+        for (int i = 0; i < 25; i++) {
+            try {
+                String message = service.sayHello("Eric");
+                System.out.println("Success: " + message);
+            } catch (SentinelRpcException ex) {
+                System.out.println("Blocked");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            Thread.sleep(50);
         }
     }
 }

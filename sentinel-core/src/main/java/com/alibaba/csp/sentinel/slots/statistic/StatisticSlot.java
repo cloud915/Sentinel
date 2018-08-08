@@ -28,13 +28,19 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
 /**
  * <p>
  * A processor slot that dedicates to real time statistics.
+ * 一个用于实时统计的处理器槽。
  * When entering this slot, we need to separately count the following
  * information:
+ * 当进入这个槽时，我们需要分别计算以下信息：
  * <ul>
  * <li>{@link ClusterNode}: total statistics of a cluster node of the resource id  </li>
+ * 资源id起源节点的集群节点的总统计信息
  * <li> origin node: statistics of a cluster node from different callers/origins.</li>
+ * 来自不同的调用/起源的集群节点的统计信息
  * <li> {@link DefaultNode}: statistics for specific resource name in the specific context.
+ * 特定上下文中的特定资源名称的统计信息。
  * <li> Finally, the sum statistics of all entrances.</li>
+ * 最后，所有入口的总和统计。
  * </ul>
  * </p>
  *
@@ -48,14 +54,16 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
         try {
             fireEntry(context, resourceWrapper, node, count, args);
-            node.increaseThreadNum();
-            node.addPassRequest();
+            node.increaseThreadNum();// 增加线程数
+            node.addPassRequest();// 增加通过请求数量
 
+            // 递增 源节点数据
             if (context.getCurEntry().getOriginNode() != null) {
                 context.getCurEntry().getOriginNode().increaseThreadNum();
                 context.getCurEntry().getOriginNode().addPassRequest();
             }
 
+            // 如果是IN类型的资源，递增ENTRY_NODE统计数据
             if (resourceWrapper.getType() == EntryType.IN) {
                 Constants.ENTRY_NODE.increaseThreadNum();
                 Constants.ENTRY_NODE.addPassRequest();

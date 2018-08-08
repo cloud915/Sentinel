@@ -49,14 +49,17 @@ public class SentinelDubboProviderFilter extends AbstractDubboFilter implements 
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        // Get origin caller.
+        // Get origin caller. “dubboApplication”
         String application = DubboUtils.getApplication(invocation, "");
 
         Entry interfaceEntry = null;
         Entry methodEntry = null;
         try {
+            // 获取资源名, 接口名:方法名(参数类型,参数类型,...)
             String resourceName = getResourceName(invoker, invocation);
+            // 获取接口名
             String interfaceName = invoker.getInterface().getName();
+            // 创建上下文、资源节点等
             ContextUtil.enter(resourceName, application);
             interfaceEntry = SphU.entry(interfaceName, EntryType.IN);
             methodEntry = SphU.entry(resourceName, EntryType.IN, 1, invocation.getArguments());

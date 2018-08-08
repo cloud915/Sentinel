@@ -19,6 +19,8 @@ import java.util.Collections;
 
 import com.alibaba.csp.sentinel.init.InitExecutor;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
+import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 
@@ -41,6 +43,7 @@ public class FooProviderBootstrap {
 
     public static void main(String[] args) {
         initFlowRule();
+        initDegradeRule();
         InitExecutor.doInit();
 
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -57,5 +60,14 @@ public class FooProviderBootstrap {
         flowRule.setGrade(RuleConstant.FLOW_GRADE_QPS);
         flowRule.setLimitApp("default");
         FlowRuleManager.loadRules(Collections.singletonList(flowRule));
+    }
+    private static void initDegradeRule(){
+        DegradeRule degradeRule=new DegradeRule();
+        degradeRule.setResource(RES_KEY);
+        degradeRule.setCount(10);
+        degradeRule.setGrade(RuleConstant.DEGRADE_GRADE_EXCEPTION);
+        degradeRule.setTimeWindow(10);
+        degradeRule.setLimitApp("default");
+        DegradeRuleManager.loadRules(Collections.singletonList(degradeRule));
     }
 }

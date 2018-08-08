@@ -255,6 +255,7 @@ public class SystemRuleManager {
 
     /**
      * Apply {@link SystemRule} to the resource. Only inbound traffic will be checked.
+     * SystemRule规则只有入站的流量才会检查
      *
      * @param resourceWrapper the resource.
      * @throws BlockException when any system rule's threshold is exceeded.
@@ -273,21 +274,25 @@ public class SystemRuleManager {
 
         // total qps
         double currentQps = Constants.ENTRY_NODE == null ? 0.0 : Constants.ENTRY_NODE.successQps();
+        // 超出qps上限，拒绝
         if (currentQps > qps) {
             throw new SystemBlockException(resourceWrapper.getName(), "qps");
         }
 
         // total thread
         int currentThread = Constants.ENTRY_NODE == null ? 0 : Constants.ENTRY_NODE.curThreadNum();
+        // 超出允许的最大并发量，拒绝
         if (currentThread > maxThread) {
             throw new SystemBlockException(resourceWrapper.getName(), "thread");
         }
 
         double rt = Constants.ENTRY_NODE == null ? 0 : Constants.ENTRY_NODE.avgRt();
+        // 当前平均响应时间 超出 最大响应时间
         if (rt > maxRt) {
             throw new SystemBlockException(resourceWrapper.getName(), "rt");
         }
 
+        // 判断系统load值是否过高
         // 完全按照RT,BBR算法来
         if (highestSystemLoadIsSet && getCurrentSystemAvgLoad() > highestSystemLoad) {
             if (currentThread > 1 &&

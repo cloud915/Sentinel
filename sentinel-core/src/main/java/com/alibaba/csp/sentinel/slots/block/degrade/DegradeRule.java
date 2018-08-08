@@ -153,16 +153,17 @@ public class DegradeRule extends AbstractRule {
 
     @Override
     public boolean passCheck(Context context, DefaultNode node, int acquireCount, Object... args) {
-
+        // 返回false代表需要降级
         if (cut) {
             return false;
         }
 
+        // 获取node，如果资源名不再map中则直接返回true
         ClusterNode clusterNode = ClusterBuilderSlot.getClusterNode(this.getResource());
         if (clusterNode == null) {
             return true;
         }
-
+        // 降级策略（0：平均RT，1：异常比率）。 RT响应时间
         if (grade == RuleConstant.DEGRADE_GRADE_RT) {
             double rt = clusterNode.avgRt();
             if (rt < this.count) {
@@ -171,6 +172,7 @@ public class DegradeRule extends AbstractRule {
             }
 
             // Sentinel will degrade the service only if count exceeds.
+            // 哨兵只有在计数超过时才会降级服务。
             if (passCount.incrementAndGet() < RT_MAX_EXCEED_N) {
                 return true;
             }
@@ -191,11 +193,12 @@ public class DegradeRule extends AbstractRule {
                 return true;
             }
         }
-
+        // 以上逻辑都不满足，都未返回true，也就是已达到降级标准
         synchronized (lock) {
             if (!cut) {
                 // Automatically degrade.
-                cut = true;
+                cut = true; // 打开降级
+                // 开启线程，将降级所需参数重置
                 ResetTask resetTask = new ResetTask(this);
                 pool.schedule(resetTask, timeWindow, TimeUnit.SECONDS);
             }

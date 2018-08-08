@@ -23,7 +23,7 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 
 /**
  * A {@link ProcessorSlot} dedicates to {@link DegradeRule} checking.
- *
+ * 用于降解器检查
  * @author leyou
  */
 public class DegradeSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
